@@ -1,0 +1,19 @@
+{
+  "name": "cinesonics",
+  "version": "1.0.0",
+  "description": "CINESONICS — Cinematic Soundtrack Concept Generator powered by Pollinations.ai",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["pollinations", "ai", "soundtrack", "cinematic"],
+  "license": "MIT"
+}

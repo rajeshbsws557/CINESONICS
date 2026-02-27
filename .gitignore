@@ -1,0 +1,24 @@
+# ═══════════════════════════════════════════════
+# CINESONICS — .gitignore
+# ═══════════════════════════════════════════════
+
+# ── Environment secrets (NEVER commit) ──
+.env
+.env.local
+.env.*.local
+
+# ── Node ──
+node_modules/
+dist/
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Editor / IDE ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
