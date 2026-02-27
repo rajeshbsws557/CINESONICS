@@ -122,6 +122,46 @@ function buildImagePrompt(vibe) {
 }
 
 // ═══════════════════════════════════════════════
+// Robust JSON Extractor
+// ═══════════════════════════════════════════════
+
+/**
+ * Attempts multiple strategies to extract a JSON object from messy AI output:
+ *   1. Direct parse (clean JSON)
+ *   2. Extract from ```json ... ``` markdown code fences
+ *   3. Find first { ... last } in the string (greedy brace match)
+ *   4. Strip common preamble text and retry
+ */
+function extractJSON(raw) {
+    const text = (raw || '').trim();
+
+    // Strategy 1: direct parse
+    try { return JSON.parse(text); } catch {}
+
+    // Strategy 2: markdown code fences
+    const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) {
+        try { return JSON.parse(fenceMatch[1].trim()); } catch {}
+    }
+
+    // Strategy 3: find outermost { ... }
+    const firstBrace = text.indexOf('{');
+    const lastBrace  = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+        const slice = text.slice(firstBrace, lastBrace + 1);
+        try { return JSON.parse(slice); } catch {}
+    }
+
+    // Strategy 4: strip common AI preamble like "Here is the JSON:\n"
+    const cleaned = text
+        .replace(/^[\s\S]*?(?=\{)/m, '')   // everything before first {
+        .replace(/\}[\s\S]*$/m, '}');       // everything after last }
+    try { return JSON.parse(cleaned); } catch {}
+
+    throw new Error('Could not extract valid JSON from AI response');
+}
+
+// ═══════════════════════════════════════════════
 // API Routes
 // ═══════════════════════════════════════════════
 
@@ -206,14 +246,12 @@ app.post('/api/generate', async (req, res) => {
         const content  = textData.choices?.[0]?.message?.content;
         if (!content) throw new Error('No content returned from AI');
 
-        // Parse JSON (handle potential markdown wrapping)
-        const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-        const jsonStr   = jsonMatch ? jsonMatch[1].trim() : content.trim();
+        // Robust JSON extraction — handle markdown fences, leading text, etc.
         let tracklist;
         try {
-            tracklist = JSON.parse(jsonStr);
-        } catch {
-            console.error('[server] JSON parse failed:', content);
+            tracklist = extractJSON(content);
+        } catch (e) {
+            console.error('[server] JSON parse failed. Raw content:\n', content);
             throw new Error('AI returned unparseable data — please try again');
         }
 
