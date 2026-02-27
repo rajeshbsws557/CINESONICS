@@ -186,7 +186,7 @@ app.post('/api/generate', async (req, res) => {
                 'Authorization': `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-                model: 'openai',
+                model: 'qwen-safety',
                 messages: [
                     { role: 'system', content: SYSTEM_PROMPT },
                     { role: 'user',   content: buildUserPrompt(vibe) },
