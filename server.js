@@ -192,7 +192,6 @@ app.post('/api/generate', async (req, res) => {
                     { role: 'user',   content: buildUserPrompt(vibe) },
                 ],
                 temperature: 0.9,
-                response_format: { type: 'json_object' },
             }),
         });
 
